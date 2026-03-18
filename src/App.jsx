@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { GHProvider, useGH } from './context/GHContext'
 import { useToast } from './hooks/useToast'
 import ToastContainer from './components/ToastContainer'
@@ -11,34 +11,31 @@ import TopicsPage from './pages/TopicsPage'
 import StarsPage from './pages/StarsPage'
 import WebhooksPage from './pages/WebhooksPage'
 import ArchivePage from './pages/ArchivePage'
+import StreakViewerPage from './pages/StreakViewerPage'
+import RepoHealthPage from './pages/RepoHealthPage'
 
 function AppInner() {
   const { token, user, logout } = useGH()
-  const { toasts, toast } = useToast()
+  const { toasts } = useToast()
 
   if (!token || !user) return <LoginPage />
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div className="app-root">
       <Sidebar user={user} onLogout={logout} />
-      <main style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '36px 40px',
-        background: 'var(--bg)',
-      }}>
-        <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <Routes>
-            <Route path="/github-notifications" element={<NotificationsPage />} />
-            <Route path="/github-notifications/bulk-watch" element={<BulkWatchPage />} />
-            <Route path="/github-notifications/visibility" element={<VisibilityPage />} />
-            <Route path="/github-notifications/topics" element={<TopicsPage />} />
-            <Route path="/github-notifications/stars" element={<StarsPage />} />
-            <Route path="/github-notifications/webhooks" element={<WebhooksPage />} />
-            <Route path="/github-notifications/archive" element={<ArchivePage />} />
-            <Route path="*" element={<Navigate to="/github-notifications" replace />} />
-          </Routes>
-        </div>
+      <main className="app-main">
+        <Routes>
+          <Route path="/github-notifications"            element={<div className="app-page"><NotificationsPage /></div>} />
+          <Route path="/github-notifications/streak"     element={<StreakViewerPage />} />
+          <Route path="/github-notifications/bulk-watch" element={<div className="app-page"><BulkWatchPage /></div>} />
+          <Route path="/github-notifications/visibility" element={<div className="app-page"><VisibilityPage /></div>} />
+          <Route path="/github-notifications/topics"     element={<div className="app-page"><TopicsPage /></div>} />
+          <Route path="/github-notifications/stars"      element={<div className="app-page"><StarsPage /></div>} />
+          <Route path="/github-notifications/webhooks"   element={<div className="app-page"><WebhooksPage /></div>} />
+          <Route path="/github-notifications/archive"    element={<div className="app-page"><ArchivePage /></div>} />
+          <Route path="/github-notifications/health"     element={<div className="app-page"><RepoHealthPage /></div>} />
+          <Route path="*"                                element={<Navigate to="/github-notifications" replace />} />
+        </Routes>
       </main>
       <ToastContainer toasts={toasts} />
     </div>

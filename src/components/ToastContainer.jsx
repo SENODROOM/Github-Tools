@@ -1,10 +1,13 @@
 export default function ToastContainer({ toasts }) {
+  if (!toasts.length) return null
   return (
-    <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="toast-wrap">
       {toasts.map(t => (
         <div key={t.id} className={`toast toast-${t.type}`}>
-          <span className="toast-icon">{t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : 'ℹ'}</span>
-          <span>{t.msg}</span>
+          <span style={{ fontSize:15, flexShrink:0 }}>
+            {t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : 'ℹ'}
+          </span>
+          <span style={{ lineHeight:1.4 }}>{t.msg}</span>
         </div>
       ))}
     </div>

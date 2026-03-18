@@ -1,100 +1,159 @@
 import { useState } from 'react'
 import { useGH } from '../context/GHContext'
-import { KeyRound, ExternalLink, ShieldCheck } from 'lucide-react'
+import { KeyRound, ExternalLink, ShieldCheck, Github } from 'lucide-react'
+
+const FEATURES = [
+  { icon: '📬', label: 'Notification inbox' },
+  { icon: '🔥', label: 'Streak & stats' },
+  { icon: '🏥', label: 'Repo health audit' },
+  { icon: '👁', label: 'Bulk watch repos' },
+  { icon: '🔒', label: 'Bulk visibility' },
+  { icon: '⚡', label: 'Webhook setup' },
+]
 
 export default function LoginPage() {
   const { saveToken, saveUser, api } = useGH()
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [show, setShow] = useState(false)
 
   async function handleLogin(e) {
     e.preventDefault()
     if (!input.trim()) return
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     try {
       saveToken(input.trim())
       const user = await api('/user')
       saveUser(user)
-    } catch (e) {
-      setError('Invalid token or insufficient permissions. Make sure it has repo + notifications scope.')
+    } catch {
+      setError('Invalid token or insufficient permissions.')
       setLoading(false)
     }
   }
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--bg)', padding: 24,
+      minHeight: '100vh', display: 'flex', background: 'var(--bg)',
+      position: 'relative', overflow: 'hidden',
     }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: 14, background: 'var(--accent-dim)',
-            border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', margin: '0 auto 16px',
-          }}>
-            <ShieldCheck size={24} color="var(--accent)" />
-          </div>
-          <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 8, fontFamily: 'var(--serif)' }}>GitHub Tools</h1>
-          <p style={{ color: 'var(--text2)', fontSize: 14 }}>Supercharge your GitHub workflow</p>
-        </div>
+      {/* Ambient glow */}
+      <div style={{
+        position: 'absolute', width: 600, height: 600, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(124,106,247,0.12) 0%, transparent 70%)',
+        top: -150, left: -100, pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', width: 400, height: 400, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(232,121,160,0.08) 0%, transparent 70%)',
+        bottom: -100, right: -50, pointerEvents: 'none',
+      }} />
 
-        <div className="card fade-up" style={{ padding: 28 }}>
-          <form onSubmit={handleLogin}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text2)', marginBottom: 8 }}>
-              Personal Access Token
-            </label>
-            <div style={{ position: 'relative', marginBottom: 16 }}>
-              <KeyRound size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text3)' }} />
-              <input
-                type="password"
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                style={{ paddingLeft: 30 }}
-                autoFocus
-              />
+      <div style={{
+        display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center',
+        padding: '24px 16px', position: 'relative', zIndex: 1,
+      }}>
+        <div style={{ width: '100%', maxWidth: 420 }}>
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(124,106,247,0.25), rgba(124,106,247,0.06))',
+              border: '1px solid var(--accent-border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 18px',
+              boxShadow: '0 0 32px rgba(124,106,247,0.2)',
+            }}>
+              <ShieldCheck size={26} color="var(--accent)" />
             </div>
-            {error && (
-              <div style={{ background: 'var(--red-dim)', border: '1px solid rgba(240,107,107,0.2)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', fontSize: 12, color: 'var(--red)', marginBottom: 16 }}>
-                {error}
-              </div>
-            )}
-            <button className="btn-primary" type="submit" disabled={loading} style={{ width: '100%', justifyContent: 'center', padding: '10px' }}>
-              {loading ? <><div className="spinner" />Connecting...</> : 'Connect GitHub'}
-            </button>
-          </form>
+            <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 8 }}>
+              GitHub Tools
+            </h1>
+            <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.5 }}>
+              Supercharge your GitHub workflow
+            </p>
+          </div>
 
-          <div className="divider" />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 4 }}>Required scopes:</div>
-            {['repo', 'notifications', 'admin:repo_hook'].map(s => (
-              <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
-                <code>{s}</code>
+          {/* Feature grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 28 }}>
+            {FEATURES.map(({ icon, label }) => (
+              <div key={label} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                background: 'var(--bg3)', border: '1px solid var(--border)',
+                fontSize: 12, color: 'var(--text2)',
+                transition: 'border-color 0.2s',
+              }}>
+                <span style={{ fontSize: 15 }}>{icon}</span> {label}
               </div>
             ))}
           </div>
 
-          <div style={{ marginTop: 16, textAlign: 'center' }}>
+          {/* Login card */}
+          <div className="card scale-in" style={{ padding: 28 }}>
+            <form onSubmit={handleLogin}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text2)', marginBottom: 7 }}>
+                Personal Access Token
+              </label>
+              <div style={{ position: 'relative', marginBottom: 16 }}>
+                <KeyRound size={13} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text3)', pointerEvents: 'none' }} />
+                <input
+                  type={show ? 'text' : 'password'}
+                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  style={{ paddingLeft: 32, paddingRight: 40 }}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow(s => !s)}
+                  className="btn-ghost btn-icon"
+                  style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', padding: 5, fontSize: 11, color: 'var(--text3)' }}
+                >
+                  {show ? '🙈' : '👁'}
+                </button>
+              </div>
+
+              {error && (
+                <div style={{
+                  background: 'var(--red-dim)', border: '1px solid var(--red-border)',
+                  borderRadius: 'var(--radius-sm)', padding: '9px 12px',
+                  fontSize: 12, color: 'var(--red)', marginBottom: 14,
+                  animation: 'fadeUp 0.2s var(--ease)',
+                }}>
+                  {error}
+                </div>
+              )}
+
+              <button className="btn-primary" type="submit" disabled={loading}
+                style={{ width: '100%', justifyContent: 'center', padding: '11px', fontSize: 14 }}>
+                {loading ? <><div className="spinner" />Connecting...</> : 'Connect GitHub'}
+              </button>
+            </form>
+
+            <div className="divider" />
+
+            <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 10 }}>Required scopes:</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+              {['repo', 'notifications', 'admin:repo_hook'].map(s => (
+                <code key={s}>{s}</code>
+              ))}
+            </div>
+
             <a
               href="https://github.com/settings/tokens/new?scopes=repo,notifications,admin:repo_hook&description=GitHub+Tools"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: 12, color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+              target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 12, color: 'var(--accent)' }}
             >
               Generate token on GitHub <ExternalLink size={11} />
             </a>
           </div>
-        </div>
 
-        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 12, color: 'var(--text3)' }}>
-          Token stored locally in your browser only.
-        </p>
+          <p style={{ textAlign: 'center', marginTop: 18, fontSize: 11, color: 'var(--text3)' }}>
+            Token stored locally · never sent to any server
+          </p>
+        </div>
       </div>
     </div>
   )
